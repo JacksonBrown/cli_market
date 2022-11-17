@@ -1,19 +1,39 @@
 #!/usr/bin/python
 
-# core import
 import datetime as dt
 
-# external import
 import yfinance as yf
 import plotext as plt
 
-# from import
 from colorama import Fore
 
+"""
+
+DATA INPUT AND ESSENTIAL FUNCTIONS
+
+"""
+
+def print_colors(color_value, color_text):
+
+    colors = ['red', 'green', 'yellow']
+
+    if (color_value == colors[0]):
+        print(Fore.RED + color_text, Fore.WHITE)
+    elif(color_value == colors[1]):
+        print(Fore.GREEN + color_text, Fore.WHITE)
+    elif(color_value == colors[2]):
+        print(Fore.YELLOW + color_text, Fore.WHITE)
+
 def ticker_input():
-    print('\n', Fore.YELLOW + 'IF USING A CRYPTO "-USD" MUST BE ADDED AT THE END OF THE TICKER (IE: BTC-USD).', Fore.WHITE, '\n')
+    print_colors("yellow", "IF USING A CRYPTO '-USD' MUST BE ADDED AT THE END OF THE TICKER (IE: BTC-USD).")
     ticker_input.ticker_value = input("Ticker:\n")
     ticker_input.ticker_value.lower()
+
+"""
+
+DATA GATHERING USING YAHOO FINANCE
+
+"""
 
 def ticker_info():
     stock = yf.Ticker(ticker_input.ticker_value).info
@@ -24,21 +44,56 @@ def ticker_info():
 
     ticker_info.market_price = stock['regularMarketPrice']
     ticker_info.previous_close_price = stock['regularMarketPreviousClose']
-    ticker_info.finance = market.quarterly_financials
-    ticker_info.dividends = market.dividends
+    ticker_info.quarterly_financial_data = market.quarterly_financials
+    ticker_info.dividend_data = market.dividends
+
+
+"""
+
+DISPLAY FINANCIAL DATA
+
+"""
+
+
+def print_quarterly_data():
+    print_colors("red", "QUARTERLY FINANCIAL DATA FOR TICKER ")
+    print_colors("green", ticker_input.ticker_value.upper())
+    print(ticker_info.quarterly_financial_data, '\n')
+
+def print_div_data():
+    print_colors("red", "DIVIDEND DATA FOR TICKER ")
+    print_colors("green", ticker_input.ticker_value.upper())
+    print(ticker_info.dividend_data, '\n')
 
 def show_values():
-    print(Fore.RED + '\nVALUES PRINTED FOR TICKER', Fore.GREEN, ticker_input.ticker_value, Fore.WHITE)
+    print_colors("red", "VALUES PRINTED FOR TICKER ")
+    print_colors("green", ticker_input.ticker_value.upper())
+    
     print('market:', ticker_info.market_price)
     print('previous close:', ticker_info.previous_close_price, '\n')
 
-    if (len(ticker_info.finance) == 0 and len(ticker_info.dividends) == 0):
-        print(Fore.RED + 'NO QUARTERLY FINANCIAL OR DIVIDEND DATA FOR', Fore.GREEN, ticker_input.ticker_value, Fore.WHITE, '\n')
+    #i'm sure there's a more efficient way to do this...
+    if (len(ticker_info.quarterly_financial_data) == 0 and len(ticker_info.dividend_data) == 0):
+        print("NO QUARTERLY FINANCIAL DATA OR DIVIDEND DATA FOR THE GIVEN TICKER \n")
+    elif(len(ticker_info.quarterly_financial_data) == 0):
+        print("NO QUARTERLY FINANCIAL DATA FOR THE GIVEN TICKER \n")
+        print_div_data()
+
+    elif(len(ticker_info.dividend_data) == 0):
+        print("NO DIVIDEND DATA FOR THE GIVEN TICKER \n")
+        print_quarterly_data()
+
     else:
-        print(Fore.RED + 'QUARTERLY FINANCIAL DATA FOR', Fore.GREEN, ticker_input.ticker_value, Fore.WHITE)
-        print(ticker_info.finance, '\n')
-        print(Fore.RED + 'DIVIDEND DATA FOR', Fore.GREEN, ticker_input.ticker_value, Fore.WHITE)
-        print(ticker_info.dividends, '\n')
+        print_quarterly_data()
+        print_div_data()
+
+
+"""
+
+DISPLAY A GRAPH OF THE GIVEN TICKER
+
+"""
+
 
 def make_plot():
 
@@ -49,20 +104,22 @@ def make_plot():
         # set plot date format and time variables
         plt.date_form('d/m/Y')
         current_date = dt.date.today()
-        current_year = current_date.year
-
-        # I'm sure there's a much more efficient way to do this...
-        str(current_year)
+        current_day = str(current_date.day)
+        current_month = str(current_date.month)
+        current_year = str(current_date.year)
 
         # set start and end dates for plot, grab data from web
 
-        date_in = input("date to start from (dd/mm/yy)? if left blank the date will be the first of the year.\n")
+        date_in = input("date to start from (dd/mm/yy)? if left blank the date will be the first of the year. \n")
+        date_in_end = input("date to end from (dd/mm/yy)? if left blank the current day will be used. \n")
 
         if (len(date_in) == 0):
             date_in = '01/01/{}'.format(current_year)
+        if (len(date_in_end) == 0):
+            date_in_end = '{}/{}/{}'.format(current_day, current_month, current_year)
 
         start = plt.string_to_datetime(date_in)
-        end = plt.today_datetime()
+        end = plt.string_to_datetime(date_in_end)
         data = yf.download(ticker_input.ticker_value, start, end)
 
         # set pricing and date variables
