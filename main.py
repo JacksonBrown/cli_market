@@ -7,12 +7,6 @@ import plotext as plt
 
 from colorama import Fore
 
-"""
-
-DATA INPUT AND ESSENTIAL FUNCTIONS
-
-"""
-
 def print_colors(color_value, color_text):
     return{
         'red'    : lambda: print(Fore.RED    + color_text, Fore.WHITE),
@@ -25,31 +19,21 @@ def ticker_input():
     ticker_input.ticker_value = input("Ticker:\n")
     ticker_input.ticker_value.lower()
 
-"""
-
-DATA GATHERING USING YAHOO FINANCE
-
-"""
-
 def ticker_info():
-    stock = yf.Ticker(ticker_input.ticker_value).info
-    #this is needed for the market price and the previous close price
+    try:
+        stock = yf.Ticker(ticker_input.ticker_value).info
+        #this is needed for the market price and the previous close price
 
-    market = yf.Ticker(ticker_input.ticker_value)
-    #this is needed for the quarterly financial data and the dividend data
+        market = yf.Ticker(ticker_input.ticker_value)
+        #this is needed for the quarterly financial data and the dividend data
 
-    ticker_info.market_price = stock['regularMarketPrice']
-    ticker_info.previous_close_price = stock['regularMarketPreviousClose']
-    ticker_info.quarterly_financial_data = market.quarterly_financials
-    ticker_info.dividend_data = market.dividends
-
-
-"""
-
-DISPLAY FINANCIAL DATA
-
-"""
-
+        ticker_info.market_price = stock['regularMarketPrice']
+        ticker_info.previous_close_price = stock['regularMarketPreviousClose']
+        ticker_info.quarterly_financial_data = market.quarterly_financials
+        ticker_info.dividend_data = market.dividends
+    except:
+        print("\nTICKER NOT FOUND\n")
+        exit()
 
 def print_quarterly_data():
     print_colors("red", "QUARTERLY FINANCIAL DATA FOR TICKER ")
@@ -61,14 +45,15 @@ def print_div_data():
     print_colors("green", ticker_input.ticker_value.upper())
     print(ticker_info.dividend_data, '\n')
 
-def show_values():
+def show_market_values():
     print_colors("red", "VALUES PRINTED FOR TICKER ")
     print_colors("green", ticker_input.ticker_value.upper())
     
     print('market:', ticker_info.market_price)
     print('previous close:', ticker_info.previous_close_price, '\n')
 
-    #i'm sure there's a more efficient way to do this...
+def show_values():
+    show_market_values()
 
     if (len(ticker_info.quarterly_financial_data) == 0 and len(ticker_info.dividend_data) == 0):
         print("NO QUARTERLY FINANCIAL DATA OR DIVIDEND DATA FOR THE GIVEN TICKER \n")
@@ -82,17 +67,8 @@ def show_values():
     else:
         print_quarterly_data()
         print_div_data()
-    
-
-"""
-
-DISPLAY A GRAPH OF THE GIVEN TICKER
-
-"""
-
 
 def make_plot():
-
     make_plot_yn = input("make plot (y/n)? \n")
 
     if (make_plot_yn == "y" or make_plot_yn == "yes"):
