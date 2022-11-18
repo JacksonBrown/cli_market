@@ -14,15 +14,11 @@ DATA INPUT AND ESSENTIAL FUNCTIONS
 """
 
 def print_colors(color_value, color_text):
-
-    colors = ['red', 'green', 'yellow']
-
-    if (color_value == colors[0]):
-        print(Fore.RED + color_text, Fore.WHITE)
-    elif(color_value == colors[1]):
-        print(Fore.GREEN + color_text, Fore.WHITE)
-    elif(color_value == colors[2]):
-        print(Fore.YELLOW + color_text, Fore.WHITE)
+    return{
+        'red'    : lambda: print(Fore.RED    + color_text, Fore.WHITE),
+        'green'  : lambda: print(Fore.GREEN  + color_text, Fore.WHITE),
+        'yellow' : lambda: print(Fore.YELLOW + color_text, Fore.WHITE)
+    }.get(color_value)()
 
 def ticker_input():
     print_colors("yellow", "IF USING A CRYPTO '-USD' MUST BE ADDED AT THE END OF THE TICKER (IE: BTC-USD).")
@@ -73,20 +69,20 @@ def show_values():
     print('previous close:', ticker_info.previous_close_price, '\n')
 
     #i'm sure there's a more efficient way to do this...
+
     if (len(ticker_info.quarterly_financial_data) == 0 and len(ticker_info.dividend_data) == 0):
         print("NO QUARTERLY FINANCIAL DATA OR DIVIDEND DATA FOR THE GIVEN TICKER \n")
-    elif(len(ticker_info.quarterly_financial_data) == 0):
+
+    if(len(ticker_info.quarterly_financial_data) == 0):
         print("NO QUARTERLY FINANCIAL DATA FOR THE GIVEN TICKER \n")
         print_div_data()
-
     elif(len(ticker_info.dividend_data) == 0):
         print("NO DIVIDEND DATA FOR THE GIVEN TICKER \n")
         print_quarterly_data()
-
     else:
         print_quarterly_data()
         print_div_data()
-
+    
 
 """
 
